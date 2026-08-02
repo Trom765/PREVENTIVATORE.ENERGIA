@@ -1,0 +1,1308 @@
+<!DOCTYPE html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Preventivatore Energie</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0f0f0f;
+        --panel: #171717;
+        --accent: #ffcf00;
+        --accent-strong: #ffd84d;
+        --accent-soft: #2d2500;
+        --text: #f7f7f2;
+        --muted: #c4c4c4;
+        --border: #2f2f2f;
+        --shadow: rgba(255, 207, 0, 0.14);
+      }
+
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: linear-gradient(135deg, #0f0f0f 0%, #1b1b1b 100%);
+        color: var(--text);
+      }
+
+      .page {
+        max-width: 1120px;
+        margin: 0 auto;
+        padding: 32px 20px 48px;
+      }
+
+      .hero {
+        background: linear-gradient(90deg, rgba(255, 207, 0, 0.16), rgba(255, 207, 0, 0.04));
+        border: 1px solid rgba(255, 207, 0, 0.25);
+        border-radius: 24px;
+        padding: 28px;
+        box-shadow: 0 10px 30px var(--shadow);
+        margin-bottom: 20px;
+      }
+
+      .hero h1 {
+        margin: 0 0 8px;
+        font-size: 2rem;
+        color: var(--accent);
+      }
+
+      .hero p {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.6;
+      }
+
+      .selection-card,
+      .card {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 20px;
+        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.22);
+      }
+
+      .selection-card {
+        margin-bottom: 20px;
+      }
+
+      .step {
+        margin-bottom: 18px;
+      }
+
+      .step:last-child { margin-bottom: 0; }
+
+      .step-label {
+        margin: 0 0 6px;
+        color: var(--accent);
+        font-size: 0.82rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
+      .step h2 {
+        margin: 0 0 12px;
+        font-size: 1.1rem;
+      }
+
+      .chip-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .chip {
+        border: 1px solid var(--border);
+        background: #222;
+        color: var(--text);
+        padding: 10px 14px;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 700;
+        transition: all 0.2s ease;
+      }
+
+      .chip.active {
+        background: var(--accent);
+        color: #111;
+        border-color: var(--accent);
+      }
+
+      .chip:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+      }
+
+      .card h2 {
+        margin-top: 0;
+        font-size: 1.2rem;
+        color: var(--accent);
+      }
+
+      .card p {
+        color: var(--muted);
+        margin-top: 0;
+        line-height: 1.6;
+      }
+
+      label {
+        display: block;
+        margin-top: 12px;
+        font-weight: 600;
+        font-size: 0.95rem;
+      }
+
+      input,
+      select {
+        width: 100%;
+        margin-top: 6px;
+        padding: 10px 12px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        font-size: 1rem;
+        background: #101010;
+        color: var(--text);
+      }
+
+      button {
+        margin-top: 16px;
+        padding: 10px 14px;
+        border: none;
+        border-radius: 10px;
+        background: var(--accent);
+        color: #111;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      button:hover { filter: brightness(1.05); }
+
+      .result {
+        margin-top: 16px;
+        padding: 12px 14px;
+        border-radius: 12px;
+        background: var(--accent-soft);
+        border: 1px solid rgba(255, 207, 0, 0.24);
+        line-height: 1.5;
+      }
+
+      .result strong { display: block; margin-bottom: 4px; }
+
+      .mini-note {
+        margin-top: 12px;
+        font-size: 0.92rem;
+        color: var(--muted);
+        line-height: 1.6;
+      }
+
+      .comparison-card {
+        grid-column: 1 / -1;
+      }
+
+      .comparison-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 12px;
+      }
+
+      .comparison-table th,
+      .comparison-table td {
+        padding: 10px 12px;
+        border: 1px solid var(--border);
+        text-align: left;
+      }
+
+      .comparison-table th {
+        background: rgba(255, 207, 0, 0.14);
+      }
+
+      .hidden {
+        display: none !important;
+      }
+
+      .utility-message {
+        padding: 24px;
+        text-align: center;
+        border: 1px dashed rgba(255, 207, 0, 0.35);
+        border-radius: 18px;
+        background: rgba(255, 207, 0, 0.06);
+      }
+
+      @media (max-width: 640px) {
+        .page { padding: 18px 14px 40px; }
+        .hero { padding: 20px; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <section class="hero">
+        <h1>Preventivatore offerte energia</h1>
+        <p>Seleziona il tipo di bolletta e poi scegli rapidamente l’offerta più adatta per confrontare luce o gas con Flat, Fix o Flex.</p>
+      </section>
+
+      <section class="selection-card">
+        <div class="step">
+          <p class="step-label">Modalità</p>
+          <h2>Scegli l’interfaccia</h2>
+          <div class="chip-group" id="mode-group">
+            <button class="chip active" type="button" data-mode="simulatore" onclick="setMode('simulatore')">Simulatore rapido</button>
+            <button class="chip" type="button" data-mode="preventivatore" onclick="setMode('preventivatore')">Preventivatore bolletta</button>
+          </div>
+        </div>
+
+        <div class="step" id="utility-step">
+          <p class="step-label">Passo 1</p>
+          <h2>Seleziona il tipo di bolletta</h2>
+          <div class="chip-group" id="utility-group">
+            <button class="chip active" type="button" data-utility="luce" onclick="setUtility('luce')">Luce</button>
+            <button class="chip" type="button" data-utility="gas" onclick="setUtility('gas')">Gas</button>
+          </div>
+        </div>
+
+        <div class="step" id="offer-step">
+          <p class="step-label">Passo 2</p>
+          <h2>Seleziona l’offerta da confrontare</h2>
+          <div class="chip-group" id="offer-group">
+            <button class="chip active" type="button" data-offer="flat" onclick="setOffer('flat')">Flat</button>
+            <button class="chip" type="button" data-offer="fix" onclick="setOffer('fix')">Fix</button>
+            <button class="chip" type="button" data-offer="flex" onclick="setOffer('flex')">Flex</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="grid" id="content-grid">
+        <article class="card offer-panel simulatore-panel" data-offer="flat">
+          <h2>Offerta Flat</h2>
+          <p>Inserisci consumo annuo e spesa annua sostenuta per applicare il piano Flat bloccato per 24 mesi.</p>
+
+          <div class="mini-note">
+            Piani disponibili:<br>
+            START fino a 800 kWh/anno — 36 €/mese<br>
+            LIGHT fino a 1.500 kWh/anno — 53 €/mese<br>
+            PRO fino a 2.500 kWh/anno — 76 €/mese<br>
+            MAXI fino a 3.500 kWh/anno — 98 €/mese<br>
+            ULTRA fino a 4.500 kWh/anno — 119 €/mese
+          </div>
+
+          <label for="flat-consumo">Consumo annuo (kWh)</label>
+          <input id="flat-consumo" type="number" min="0" step="any" placeholder="Es. 3500" />
+
+          <label for="flat-spesa">Spesa annua sostenuta (€)</label>
+          <input id="flat-spesa" type="number" min="0" step="any" placeholder="Es. 980" />
+
+          <label for="flat-potenza">Potenza contatore (kW)</label>
+          <input id="flat-potenza" type="number" min="0" step="any" placeholder="Es. 4.5" />
+          <div class="mini-note">Per potenze di 4,5 kW viene aggiunto +5 €/mese; per 6 kW viene aggiunto +10 €/mese.</div>
+
+          <button type="button" onclick="calcolaFlat()">Calcola Flat</button>
+          <div id="flat-risultato" class="result">Nessun calcolo ancora effettuato.</div>
+        </article>
+
+        <article class="card offer-panel simulatore-panel" data-offer="fix">
+          <h2>Offerta Fix</h2>
+          <p>Inserisci il prezzo fisso al kWh bloccato per 12 mesi e il costo fisso di commercializzazione.</p>
+
+          <label for="fix-consumo">Consumo mensile (kWh)</label>
+          <input id="fix-consumo" type="number" min="0" step="any" placeholder="Es. 300" />
+
+          <label for="fix-periodo">Periodo di confronto</label>
+          <select id="fix-periodo">
+            <option value="1">1 mese</option>
+            <option value="2">2 mesi</option>
+          </select>
+
+          <label for="fix-prezzo-kwh">Costo al kWh Fastweb (€ / kWh)</label>
+          <input id="fix-prezzo-kwh" type="number" min="0" step="any" placeholder="Es. 0.180" />
+
+          <label for="fix-commercializzazione">Commercializzazione Fastweb (€ / mese)</label>
+          <input id="fix-commercializzazione" type="number" min="0" step="any" placeholder="Es. 8" />
+
+          <label for="fix-competitor-prezzo">Prezzo dell'operatore confrontato (€ / kWh)</label>
+          <input id="fix-competitor-prezzo" type="number" min="0" step="any" placeholder="Es. 0.200" />
+
+          <label for="fix-competitor-commercializzazione">Commercializzazione operatore confrontato (€ / mese)</label>
+          <input id="fix-competitor-commercializzazione" type="number" min="0" step="any" placeholder="Es. 7" />
+
+          <button type="button" onclick="calcolaFix()">Calcola Fix</button>
+          <div id="fix-risultato" class="result">Nessun calcolo ancora effettuato.</div>
+        </article>
+
+        <article class="card offer-panel simulatore-panel" data-offer="flex">
+          <h2>Offerta Flex</h2>
+          <p>Inserisci il costo fisso di commercializzazione, il PUN di riferimento e lo spread del gestore.</p>
+
+          <label for="flex-consumo">Consumo mensile (kWh)</label>
+          <input id="flex-consumo" type="number" min="0" step="any" placeholder="Es. 300" />
+
+          <label for="flex-periodo">Periodo di confronto</label>
+          <select id="flex-periodo">
+            <option value="1">1 mese</option>
+            <option value="2">2 mesi</option>
+          </select>
+
+          <label for="flex-commercializzazione">Commercializzazione Fastweb (€ / mese)</label>
+          <input id="flex-commercializzazione" type="number" min="0" step="any" placeholder="Es. 8" />
+
+          <label for="flex-pun">Costo al kWh Fastweb (PUN + spread) (€ / kWh)</label>
+          <input id="flex-pun" type="number" min="0" step="any" placeholder="Es. 0.11" />
+
+          <label for="flex-spread">Spread del gestore (€ / kWh)</label>
+          <input id="flex-spread" type="number" min="0" step="any" placeholder="Es. 0.026" />
+
+          <label for="flex-competitor-prezzo">Prezzo dell'operatore confrontato (€ / kWh)</label>
+          <input id="flex-competitor-prezzo" type="number" min="0" step="any" placeholder="Es. 0.140" />
+
+          <label for="flex-competitor-commercializzazione">Commercializzazione operatore confrontato (€ / mese)</label>
+          <input id="flex-competitor-commercializzazione" type="number" min="0" step="any" placeholder="Es. 6" />
+
+          <button type="button" onclick="calcolaFlex()">Calcola Flex</button>
+          <div id="flex-risultato" class="result">Nessun calcolo ancora effettuato.</div>
+        </article>
+
+        <article class="card preventivatore-panel hidden" id="preventivatore-card">
+          <h2>Preventivatore bolletta</h2>
+          <p>Leggi lo scontrino energia e riportane i dati a testo per generare un preventivo FASTWEB + VODAFONE.</p>
+
+          <label for="pdf-upload">Carica il PDF della bolletta</label>
+          <input id="pdf-upload" type="file" accept="application/pdf" />
+          <button type="button" onclick="caricaPdfBolletta()">Usa il PDF come riferimento</button>
+          <p class="mini-note">Puoi anche usare un file remoto aprendo questa pagina con <code>?file=<em>URL_DEL_PDF</em></code>. Assicurati che l’URL sia codificato con <code>encodeURIComponent()</code> e che il server remoto fornisca <code>Access-Control-Allow-Origin: *</code>.</p>
+          <p class="mini-note"><strong>Nota:</strong> la generazione finale del PDF di preventivo avviene tramite lo script Python <code>preventivatore.py</code>. Esegui il comando dal terminale per creare il documento.</p>
+
+          <label for="scontrino-nome">Nome cliente / azienda</label>
+          <input id="scontrino-nome" type="text" placeholder="Es. Rossi S.r.l." />
+
+          <label for="scontrino-gestore">Operatore attuale</label>
+          <input id="scontrino-gestore" type="text" placeholder="Es. Edison Energia" />
+
+          <label for="scontrino-indirizzo">Indirizzo fornitura</label>
+          <input id="scontrino-indirizzo" type="text" placeholder="Es. Piazza Statuto 20 C, 10122 Torino TO" />
+
+          <label for="scontrino-pod">POD</label>
+          <input id="scontrino-pod" type="text" placeholder="Es. IT020E00657964" />
+
+          <label for="scontrino-consumo">Consumo della bolletta (kWh)</label>
+          <input id="scontrino-consumo" type="number" min="0" step="any" placeholder="Es. 300" />
+
+          <label for="scontrino-spesa">Spesa totale della bolletta (€)</label>
+          <input id="scontrino-spesa" type="number" min="0" step="any" placeholder="Es. 72" />
+
+          <label for="scontrino-potenza">Potenza contatore (kW)</label>
+          <input id="scontrino-potenza" type="number" min="0" step="any" placeholder="Es. 3" />
+
+          <label for="scontrino-periodo">Periodo di riferimento</label>
+          <select id="scontrino-periodo">
+            <option value="1">1 mese</option>
+            <option value="2">2 mesi</option>
+          </select>
+
+          <div class="mini-note">Il vetro dei dati viene interpretato dallo scontrino: se manca qualcosa, puoi comunque completare manualmente i campi.</div>
+
+          <button type="button" onclick="calcolaScontrino()">Calcola preventivo</button>
+          <button type="button" onclick="calcolaTuttiDaScontrino()">Calcola offerte (FIX / FLEX / FLAT)</button>
+          <button type="button" onclick="generaPreventivoPDF()">Genera preventivo PDF</button>
+          <div id="scontrino-risultato" class="result">Nessun calcolo ancora effettuato.</div>
+        </article>
+
+        <article class="card comparison-card simulatore-panel" id="comparison-card">
+          <h2>Confronto finale</h2>
+          <p>Mostra un riepilogo comparativo delle tre offerte usando i valori inseriti.</p>
+          <button type="button" onclick="confrontaOfferte()">Confronta offerte</button>
+          <div id="confronto-risultato" class="result">Nessun confronto ancora eseguito.</div>
+        </article>
+      </section>
+
+      <div id="gas-message" class="utility-message hidden">
+        <h2>Confronto gas in preparazione</h2>
+        <p>La sezione dedicata al gas sarà arricchita con i calcoli specifici nelle prossime versioni.</p>
+      </div>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.2.67/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>
+      const PDFJS_VERSION = '4.2.67';
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDFJS_VERSION}/pdf.worker.min.js`;
+      if (window.pdfjsLib.version && window.pdfjsLib.version !== PDFJS_VERSION) {
+        console.warn(`PDF.js version mismatch: library ${window.pdfjsLib.version} vs worker ${PDFJS_VERSION}`);
+      }
+
+      const remoteFileParam = new URLSearchParams(window.location.search).get('file');
+      if (remoteFileParam) {
+        const decodedUrl = decodeURIComponent(remoteFileParam);
+        loadPdfFromUrl(decodedUrl);
+      }
+
+      if (window.location.protocol === 'file:') {
+        const output = document.getElementById('scontrino-risultato');
+        if (output) {
+          output.innerHTML = '<strong>Attenzione:</strong> apri questa pagina con un server locale (http:// o https://) anziché con file:// per evitare blocchi di sicurezza e problemi CORS con PDF.js.';
+        }
+      }
+
+      function calcolaCostoAggiuntivoPotenza(potenza) {
+        if (potenza >= 6) {
+          return 10;
+        }
+        if (potenza >= 4.5) {
+          return 5;
+        }
+        return 0;
+      }
+
+      function setUtility(utility) {
+        const utilityButtons = document.querySelectorAll('#utility-group .chip');
+        utilityButtons.forEach((button) => button.classList.toggle('active', button.dataset.utility === utility));
+
+        const offerStep = document.getElementById('offer-step');
+        const offerButtons = document.querySelectorAll('#offer-group .chip');
+        const offerPanels = document.querySelectorAll('.offer-panel');
+        const comparisonCard = document.getElementById('comparison-card');
+        const gasMessage = document.getElementById('gas-message');
+
+        if (utility === 'luce') {
+          offerStep.classList.remove('hidden');
+          offerButtons.forEach((button) => button.disabled = false);
+          offerPanels.forEach((panel) => panel.classList.remove('hidden'));
+          comparisonCard.classList.remove('hidden');
+          gasMessage.classList.add('hidden');
+        } else {
+          offerStep.classList.add('hidden');
+          offerButtons.forEach((button) => button.disabled = true);
+          offerPanels.forEach((panel) => panel.classList.add('hidden'));
+          comparisonCard.classList.add('hidden');
+          gasMessage.classList.remove('hidden');
+        }
+      }
+
+      function setMode(mode) {
+        const modeButtons = document.querySelectorAll('#mode-group .chip');
+        modeButtons.forEach((button) => button.classList.toggle('active', button.dataset.mode === mode));
+
+        const utilityStep = document.getElementById('utility-step');
+        const offerStep = document.getElementById('offer-step');
+        const simulatorePanels = document.querySelectorAll('.simulatore-panel');
+        const preventivatorePanel = document.getElementById('preventivatore-card');
+
+        if (mode === 'simulatore') {
+          utilityStep.classList.remove('hidden');
+          offerStep.classList.remove('hidden');
+          simulatorePanels.forEach((panel) => panel.classList.remove('hidden'));
+          preventivatorePanel.classList.add('hidden');
+        } else {
+          utilityStep.classList.add('hidden');
+          offerStep.classList.add('hidden');
+          simulatorePanels.forEach((panel) => panel.classList.add('hidden'));
+          preventivatorePanel.classList.remove('hidden');
+        }
+      }
+
+      function setOffer(offer) {
+        const buttons = document.querySelectorAll('#offer-group .chip');
+        buttons.forEach((button) => button.classList.toggle('active', button.dataset.offer === offer));
+
+        document.querySelectorAll('.offer-panel').forEach((panel) => {
+          panel.classList.toggle('hidden', panel.dataset.offer !== offer);
+        });
+      }
+
+      function calcolaFlat() {
+        const consumo = parseFloat(document.getElementById('flat-consumo').value) || 0;
+        const spesa = parseFloat(document.getElementById('flat-spesa').value) || 0;
+        const potenza = parseFloat(document.getElementById('flat-potenza').value) || 0;
+        const costoMedio = consumo > 0 ? spesa / consumo : 0;
+
+        const piani = [
+          { nome: 'START', max: 800, costoMensile: 36, restituzione: 0.30 },
+          { nome: 'LIGHT', max: 1500, costoMensile: 53, restituzione: 0.27 },
+          { nome: 'PRO', max: 2500, costoMensile: 76, restituzione: 0.21 },
+          { nome: 'MAXI', max: 3500, costoMensile: 98, restituzione: 0.20 },
+          { nome: 'ULTRA', max: 4500, costoMensile: 119, restituzione: 0.13 }
+        ];
+
+        let piano = piani[piani.length - 1];
+        for (const item of piani) {
+          if (consumo <= item.max) {
+            piano = item;
+            break;
+          }
+        }
+
+        const costoAggiuntivoPotenza = calcolaCostoAggiuntivoPotenza(potenza);
+        const costoMensilePiano = piano.costoMensile + costoAggiuntivoPotenza;
+        const costoAnnualePiano = costoMensilePiano * 12;
+        const kwhNonConsumati = Math.max(piano.max - consumo, 0);
+        const restituzioneBase = kwhNonConsumati * piano.restituzione;
+        const spesaAnnuaFastweb = costoAnnualePiano;
+        const restituzioneCredito = restituzioneBase;
+        const spesaAnnuaTotaleFastweb = Math.max(spesaAnnuaFastweb - restituzioneCredito, 0);
+        const risparmioAnnuale = spesa > 0 ? Math.max(spesa - spesaAnnuaTotaleFastweb, 0) : 0;
+        const kwhEquivalentiRisparmiati = kwhNonConsumati;
+        const restituzioneStimata = restituzioneCredito;
+        const sogliaAnnuale = piano.max;
+        const consumoSmart = consumo < sogliaAnnuale * 0.7 ? consumo : 0;
+        const bonusSmart = consumoSmart * 0.02;
+
+        document.getElementById('flat-risultato').innerHTML = `
+          <strong>Valore Flat</strong>
+          <br><strong>Dati input</strong><br>
+          Consumo annuo: ${consumo.toFixed(2)} kWh<br>
+          Spesa annua sostenuta (cliente): ${spesa.toFixed(2)} €<br>
+          Potenza contatore: ${potenza.toFixed(2)} kW<br>
+          Addizionale potenza: ${costoAggiuntivoPotenza.toFixed(2)} €/mese<br>
+          <br><strong>Dettaglio Fastweb</strong><br>
+          Piano applicato: ${piano.nome} (${piano.costoMensile.toFixed(0)} €/mese)<br>
+          Costo annuale piano Fastweb (mensile × 12): ${spesaAnnuaFastweb.toFixed(2)} €<br>
+          kWh non consumati nel pacchetto: ${kwhNonConsumati.toFixed(2)} kWh<br>
+          Restituzione: ${piano.restituzione.toFixed(2)} €/kWh non consumato<br>
+          Credito restituzione: ${restituzioneCredito.toFixed(2)} €<br>
+          Costo annuale Fastweb al netto del credito: ${spesaAnnuaTotaleFastweb.toFixed(2)} €<br>
+          <br><strong>Confronto finale</strong><br>
+          Spesa attuale cliente: ${spesa.toFixed(2)} €<br>
+          Risparmio annuale stimato: ${risparmioAnnuale.toFixed(2)} €<br>
+          kWh equivalenti risparmiati: ${kwhEquivalentiRisparmiati.toFixed(2)} kWh<br>
+          Restituzione stimata: ${restituzioneStimata.toFixed(2)} €<br>
+          Bonus Consumo Smart: ${bonusSmart.toFixed(2)} €
+        `;
+      }
+
+      function escapeRegex(value) {
+        return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      }
+
+      function cercaValorePerVoci(righe, voci) {
+        for (const riga of righe) {
+          const normalizzata = riga.toLowerCase().replace(/\s+/g, ' ').trim();
+          if (!normalizzata) {
+            continue;
+          }
+
+          for (const voce of voci) {
+            const regex = new RegExp(`\\b${escapeRegex(voce)}\\b[^0-9,.-]{0,12}([0-9]+(?:[.,][0-9]{1,3})?)`, 'i');
+            const match = normalizzata.match(regex);
+            if (match) {
+              return parseFloat(match[1].replace(',', '.'));
+            }
+          }
+        }
+
+        return null;
+      }
+
+      function parseNumeroTestuale(testo, paroleChiave) {
+        const righe = testo.split(/\n|\r/).map((riga) => riga.trim()).filter(Boolean);
+        const valore = cercaValorePerVoci(righe, paroleChiave);
+        if (valore !== null) {
+          return valore;
+        }
+
+        const normalizzato = testo.replace(/\s+/g, ' ').toLowerCase();
+        const candidati = [];
+
+        for (const chiave of paroleChiave) {
+          const regex = new RegExp(`${escapeRegex(chiave)}[^0-9,.-]{0,12}([0-9]+(?:[.,][0-9]{1,3})?)`, 'i');
+          const match = normalizzato.match(regex);
+          if (match) {
+            candidati.push(parseFloat(match[1].replace(',', '.')));
+          }
+        }
+
+        if (candidati.length > 0) {
+          return candidati[0];
+        }
+
+        const euroRegex = /([0-9]+(?:[.,][0-9]{1,2})?)\s*(€|eur)/i;
+        const euroMatch = normalizzato.match(euroRegex);
+        if (euroMatch) {
+          return parseFloat(euroMatch[1].replace(',', '.'));
+        }
+
+        return null;
+      }
+
+      function parseImportoLine(testo, paroleChiave) {
+        if (!Array.isArray(paroleChiave)) {
+          paroleChiave = [paroleChiave];
+        }
+
+        for (const chiave of paroleChiave) {
+          const regex = new RegExp(`${escapeRegex(chiave)}[\s\S]{0,80}?([0-9]+(?:[.,][0-9]{1,2})?)\s*€`, 'i');
+          const match = testo.match(regex);
+          if (match) {
+            return parseFloat(match[1].replace('.', '').replace(',', '.'));
+          }
+        }
+
+        return null;
+      }
+
+      function parseImportoLineSum(testo, paroleChiave) {
+        if (!Array.isArray(paroleChiave)) {
+          paroleChiave = [paroleChiave];
+        }
+
+        const joined = paroleChiave.map(escapeRegex).join('|');
+        const regex = new RegExp(`(?:${joined})[\s\S]{0,80}?([0-9]+(?:[.,][0-9]{1,2})?)\s*€`, 'gi');
+        let match;
+        let totale = 0;
+        let trovato = false;
+
+        while ((match = regex.exec(testo)) !== null) {
+          totale += parseFloat(match[1].replace('.', '').replace(',', '.'));
+          trovato = true;
+        }
+
+        return trovato ? totale : null;
+      }
+
+      function parseConsumoKwh(testo) {
+        const righe = testo.split(/\n|\r/).map((riga) => riga.trim()).filter(Boolean);
+        for (const riga of righe) {
+          const lower = riga.toLowerCase();
+          if (lower.includes('kwh')) {
+            const match = riga.match(/([0-9]+(?:\.[0-9]{3})*(?:,[0-9]+)?)\s*kwh/i);
+            if (match) {
+              return parseFloat(match[1].replace('.', '').replace(',', '.'));
+            }
+          }
+        }
+        return null;
+      }
+
+      function parseTestoPerVoce(testo, paroleChiave) {
+        const righe = testo.split(/\n|\r/).map((riga) => riga.trim()).filter(Boolean);
+        for (const riga of righe) {
+          const normalizzata = riga.toLowerCase();
+          for (const chiave of paroleChiave) {
+            if (normalizzata.includes(chiave.toLowerCase())) {
+              const separatore = riga.indexOf(':');
+              if (separatore !== -1) {
+                return riga.slice(separatore + 1).trim();
+              }
+              const parti = riga.split(/\s{2,}/).filter(Boolean);
+              if (parti.length > 1) {
+                return parti.slice(1).join(' ').trim();
+              }
+            }
+          }
+        }
+        return null;
+      }
+
+      function parsePeriodoTestuale(testo) {
+        const normalizzato = testo.replace(/\s+/g, ' ');
+        const patterns = [
+          /(?:dal|da|periodo|periodo di fatturazione|fino al|al)\s*([0-9]{1,2}[\/.-][0-9]{1,2}[\/.-][0-9]{2,4})\s*(?:al|a|fino al|-)\s*([0-9]{1,2}[\/.-][0-9]{1,2}[\/.-][0-9]{2,4})/i,
+          new RegExp('([0-9]{1,2}[\\/.-][0-9]{1,2}[\\/.-][0-9]{2,4})\\s*(?:-|\\/|al|a)\\s*([0-9]{1,2}[\\/.-][0-9]{1,2}[\\/.-][0-9]{2,4})', 'i')
+        ];
+
+        for (const pattern of patterns) {
+          const match = normalizzato.match(pattern);
+          if (match) {
+            return { inizio: match[1], fine: match[2] };
+          }
+        }
+
+        return null;
+      }
+
+      async function processPdfData(arrayBuffer) {
+        const pdf = await window.pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        let testo = '';
+
+        for (let pagina = 1; pagina <= pdf.numPages; pagina += 1) {
+          const page = await pdf.getPage(pagina);
+          const contenuto = await page.getTextContent();
+          testo += contenuto.items.map((item) => item.str).join(' ') + '\n';
+        }
+
+        const intestatario = parseTestoPerVoce(testo, ['intestatario', 'cliente', 'ragione sociale']);
+        const indirizzo = parseTestoPerVoce(testo, ['indirizzo fornitura', 'indirizzo', 'sede di fornitura']);
+        const pod = parseTestoPerVoce(testo, ['punto di prelievo', 'pod']);
+        const consumo = parseConsumoKwh(testo) ?? parseNumeroTestuale(testo, ['consumo', 'consumo kwh', 'consumo totale', 'energia attiva', 'consumo energia']);
+        const spesa = parseNumeroTestuale(testo, ['spesa totale', 'importo totale', 'totale fattura', 'totale da pagare', 'importo bolletta', 'importo da pagare', 'totale bolletta', 'importo', 'spesa']);
+        const potenza = parseNumeroTestuale(testo, ['potenza', 'potenza impegnata', 'potenza contratto', 'potenza nominale']);
+        const periodo = parsePeriodoTestuale(testo);
+        const quotaPerConsumi = parseImportoLine(testo, ['QUOTA PER CONSUMI', 'Quota per consumi']);
+        const quotaFissa = parseImportoLine(testo, ['QUOTA FISSA', 'Quota fissa']);
+        const quotaPotenza = parseImportoLine(testo, ['QUOTA POTENZA', 'Quota potenza']);
+        const reteOneri = parseImportoLineSum(testo, ['di cui spesa per la rete e gli oneri generali di sistema', 'Rete e Oneri']);
+        const acciseIva = parseImportoLine(testo, ['Accise e IVA', 'Accise e iva']);
+        const totaleBolletta = parseImportoLine(testo, ['Totale Bolletta', 'Totale bolletta', 'Totale Bolletta Bimestrale']);
+
+        window.ultimoPreventivoBolletta = {
+          quotaPerConsumi,
+          quotaFissa,
+          quotaPotenza,
+          reteOneri,
+          acciseIva,
+          totaleBolletta
+        };
+
+        return {
+          intestatario,
+          indirizzo,
+          pod,
+          consumo,
+          spesa,
+          potenza,
+          periodo,
+          quotaPerConsumi,
+          quotaFissa,
+          quotaPotenza,
+          reteOneri,
+          acciseIva,
+          totaleBolletta
+        };
+      }
+
+      async function caricaPdfBolletta() {
+        const input = document.getElementById('pdf-upload');
+        const file = input.files && input.files[0];
+        const output = document.getElementById('scontrino-risultato');
+
+        if (!file) {
+          output.innerHTML = '<strong>PDF non caricato</strong><br>Seleziona un file PDF della bolletta per continuare.';
+          return;
+        }
+
+        if (!window.pdfjsLib) {
+          output.innerHTML = '<strong>PDF.js non disponibile</strong><br>Il caricamento del PDF richiede un collegamento esterno, riprova più tardi.';
+          return;
+        }
+
+        try {
+          const arrayBuffer = await file.arrayBuffer();
+          const result = await processPdfData(arrayBuffer);
+          fillScontrinoFields(result);
+          renderScontrinoSummary(result, output);
+        } catch (error) {
+          output.innerHTML = `<strong>Impossibile leggere il PDF</strong><br>${error.message}`;
+        }
+      }
+
+      async function loadPdfFromUrl(url) {
+        const output = document.getElementById('scontrino-risultato');
+        if (!window.pdfjsLib) {
+          output.innerHTML = '<strong>PDF.js non disponibile</strong><br>Il caricamento del PDF richiede un collegamento esterno, riprova più tardi.';
+          return;
+        }
+
+        try {
+          const response = await fetch(url, { mode: 'cors' });
+          if (!response.ok) {
+            throw new Error(`Impossibile recuperare il PDF: ${response.status} ${response.statusText}`);
+          }
+          const arrayBuffer = await response.arrayBuffer();
+          const result = await processPdfData(arrayBuffer);
+          fillScontrinoFields(result);
+          renderScontrinoSummary(result, output);
+        } catch (error) {
+          output.innerHTML = `<strong>Impossibile caricare il PDF remoto</strong><br>${error.message}<br><br>Verifica che il server remoto permetta CORS con <code>Access-Control-Allow-Origin: *</code> e che tu stia eseguendo la pagina da http(s), non da file://.`;
+        }
+      }
+
+      function fillScontrinoFields(data) {
+        if (data.intestatario) {
+          document.getElementById('scontrino-nome').value = data.intestatario;
+        }
+        if (data.indirizzo) {
+          document.getElementById('scontrino-indirizzo').value = data.indirizzo;
+        }
+        if (data.pod) {
+          document.getElementById('scontrino-pod').value = data.pod;
+        }
+        if (data.consumo !== null) {
+          document.getElementById('scontrino-consumo').value = data.consumo.toFixed(2);
+        }
+        if (data.spesa !== null) {
+          document.getElementById('scontrino-spesa').value = data.spesa.toFixed(2);
+        }
+        if (data.potenza !== null) {
+          document.getElementById('scontrino-potenza').value = data.potenza.toFixed(2);
+        }
+      }
+
+      function renderScontrinoSummary(data, output) {
+        output.innerHTML = `
+          <strong>Dati estratti dalle voci dello scontrino</strong><br>
+          Cliente: ${data.intestatario || 'non trovato'}<br>
+          Indirizzo: ${data.indirizzo || 'non trovato'}<br>
+          POD: ${data.pod || 'non trovato'}<br>
+          Consumo: ${data.consumo !== null ? data.consumo.toFixed(2) : 'non trovato'} kWh<br>
+          Spesa: ${data.spesa !== null ? data.spesa.toFixed(2) : 'non trovata'} €<br>
+          Potenza: ${data.potenza !== null ? data.potenza.toFixed(2) : 'non trovata'} kW<br>
+          Quota per consumi: ${data.quotaPerConsumi !== null ? data.quotaPerConsumi.toFixed(2) + ' €' : 'non rilevata'}<br>
+          Quota fissa: ${data.quotaFissa !== null ? data.quotaFissa.toFixed(2) + ' €' : 'non rilevata'}<br>
+          Quota potenza: ${data.quotaPotenza !== null ? data.quotaPotenza.toFixed(2) + ' €' : 'non rilevata'}<br>
+          Rete, Oneri e Potenza: ${data.reteOneri !== null ? data.reteOneri.toFixed(2) + ' €' : 'non rilevata'}<br>
+          Accise e IVA: ${data.acciseIva !== null ? data.acciseIva.toFixed(2) + ' €' : 'non rilevata'}<br>
+          Totale bolletta: ${data.totaleBolletta !== null ? data.totaleBolletta.toFixed(2) + ' €' : 'non rilevato'}<br>
+          Periodo: ${data.periodo ? `${data.periodo.inizio} → ${data.periodo.fine}` : 'non rilevato'}<br>
+          <br>Puoi ora completare il preventivo o premere di nuovo “Calcola preventivo”.
+        `;
+      }
+
+      function calcolaScontrino() {
+        const nome = document.getElementById('scontrino-nome').value || 'Cliente';
+        const gestore = document.getElementById('scontrino-gestore').value || 'Operatore attuale';
+        const consumo = parseFloat(document.getElementById('scontrino-consumo').value) || 0;
+        const spesa = parseFloat(document.getElementById('scontrino-spesa').value) || 0;
+        const potenza = parseFloat(document.getElementById('scontrino-potenza').value) || 0;
+        const periodo = parseInt(document.getElementById('scontrino-periodo').value, 10) || 1;
+        const costoMedioKwh = consumo > 0 ? spesa / consumo : 0;
+        const addizionalePotenza = calcolaCostoAggiuntivoPotenza(potenza);
+        const spesaStimataMensile = periodo > 0 ? spesa / periodo + addizionalePotenza : 0;
+        const spesaStimataAnnuale = spesaStimataMensile * 12;
+        const stimaAnnualeDaConsumo = consumo > 0 ? costoMedioKwh * consumo * 12 : 0;
+
+        let valutazione = 'Spesa in linea con un contratto standard.';
+        if (costoMedioKwh > 0.22) {
+          valutazione = 'Prezzo medio elevato: potrebbe essere interessante valutare un preventivo più competitivo.';
+        } else if (costoMedioKwh < 0.16) {
+          valutazione = 'Prezzo medio contenuto: il confronto resta utile per verificare eventuali margini di risparmio.';
+        }
+
+        document.getElementById('scontrino-risultato').innerHTML = `
+          <strong>Preventivo da scontrino</strong>
+          Cliente: ${nome}<br>
+          Operatore attuale: ${gestore}<br>
+          Consumo indicato: ${consumo.toFixed(2)} kWh<br>
+          Spesa totale del periodo: ${spesa.toFixed(2)} €<br>
+          Costo medio al kWh: ${costoMedioKwh.toFixed(4)} €/kWh<br>
+          Potenza contatore: ${potenza.toFixed(2)} kW<br>
+          Addizionale potenza: ${addizionalePotenza.toFixed(2)} €/mese<br>
+          Spesa stimata mensile: ${spesaStimataMensile.toFixed(2)} €/mese<br>
+          Spesa stimata annuale: ${spesaStimataAnnuale.toFixed(2)} €<br>
+          Stima annuale su base consumo: ${stimaAnnualeDaConsumo.toFixed(2)} €<br>
+          <br>${valutazione}<br>
+          <em>Premi Genera preventivo PDF per scaricare il documento Fastweb + Vodafone.</em>
+        `;
+      }
+
+      function calcolaTuttiDaScontrino() {
+        const nome = document.getElementById('scontrino-nome').value || 'Cliente';
+        const gestore = document.getElementById('scontrino-gestore').value || 'Operatore attuale';
+        const consumo = parseFloat(document.getElementById('scontrino-consumo').value) || 0; // consumo nel periodo
+        const spesa = parseFloat(document.getElementById('scontrino-spesa').value) || 0; // spesa nel periodo
+        const potenza = parseFloat(document.getElementById('scontrino-potenza').value) || 0;
+        const periodo = parseInt(document.getElementById('scontrino-periodo').value, 10) || 1; // mesi (1 o 2)
+        const data = window.ultimoPreventivoBolletta || {};
+        const reteOneri = data.reteOneri ?? Math.max(spesa - 0, 0);
+
+        // Parametri commerciali
+        const prezzoFix = 0.16; // €/kWh
+        const prezzoFlex = 0.149; // €/kWh
+        const commercializzazione = 10; // €/mese
+
+        // FIX calculations (per periodo)
+        const fixEnergia = consumo * prezzoFix;
+        const fixCommercializzazione = commercializzazione * periodo;
+        const fixTipo = fixEnergia + fixCommercializzazione;
+        const fixAccise = fixTipo * 0.05;
+        const fixIva = (fixTipo + fixAccise) * 0.22;
+        const fixRete = reteOneri || Math.max(spesa - fixTipo - fixAccise - fixIva, 0);
+        const fixTotale = fixTipo + fixRete + fixAccise + fixIva;
+
+        // FLEX calculations (per periodo)
+        const flexEnergia = consumo * prezzoFlex;
+        const flexCommercializzazione = commercializzazione * periodo;
+        const flexTipo = flexEnergia + flexCommercializzazione;
+        const flexAccise = flexTipo * 0.05;
+        const flexIva = (flexTipo + flexAccise) * 0.22;
+        const flexRete = reteOneri || fixRete;
+        const flexTotale = flexTipo + flexRete + flexAccise + flexIva;
+
+        // FLAT calculations: scegli piano su consumo annuo stimato
+        const consumoAnn = consumo * (12 / periodo);
+        const piani = [
+          { nome: 'START', max: 800, costoMensile: 36, restituzione: 0.30 },
+          { nome: 'LIGHT', max: 1500, costoMensile: 53, restituzione: 0.27 },
+          { nome: 'PRO', max: 2500, costoMensile: 76, restituzione: 0.21 },
+          { nome: 'MAXI', max: 3500, costoMensile: 98, restituzione: 0.20 },
+          { nome: 'ULTRA', max: 4500, costoMensile: 119, restituzione: 0.13 }
+        ];
+        let piano = piani[piani.length - 1];
+        for (const item of piani) {
+          if (consumoAnn <= item.max) { piano = item; break; }
+        }
+        const addizionalePotenza = calcolaCostoAggiuntivoPotenza(potenza);
+        const costoMensilePiano = piano.costoMensile + addizionalePotenza;
+        const costoPeriodoFlat = costoMensilePiano * periodo;
+        const kwhNonConsumatiAnn = Math.max(piano.max - consumoAnn, 0);
+        const restituzioneAnn = kwhNonConsumatiAnn * piano.restituzione;
+        const restituzionePeriodo = restituzioneAnn * (periodo / 12);
+        const flatTotale = Math.max(costoPeriodoFlat - restituzionePeriodo, 0);
+
+        // Baseline spesa (dal campo spesa) è il totale sul periodo
+        const baselinePeriodo = spesa;
+
+        // Confronti e risparmi
+        const risparmioFixPeriodo = baselinePeriodo - fixTotale;
+        const risparmioFlexPeriodo = baselinePeriodo - flexTotale;
+        const risparmioFlatPeriodo = baselinePeriodo - flatTotale;
+
+        // Annualizza risparmi per confronto
+        const risparmioFixAnn = risparmioFixPeriodo * (12 / periodo);
+        const risparmioFlexAnn = risparmioFlexPeriodo * (12 / periodo);
+        const risparmioFlatAnn = risparmioFlatPeriodo * (12 / periodo);
+
+        // Render risultati
+        const out = document.getElementById('scontrino-risultato');
+        out.innerHTML = `
+          <strong>Risultati calcolo offerte (periodo: ${periodo} mese${periodo>1?'i':''})</strong><br>
+          <table class="comparison-table" style="margin-top:8px;">
+            <thead><tr><th>Offerta</th><th style="text-align:right">Totale periodo (€)</th><th style="text-align:right">Risparmio periodo (€)</th><th style="text-align:right">Risparmio annuo (€)</th></tr></thead>
+            <tbody>
+              <tr><td>Baseline (scontrino)</td><td style="text-align:right">${baselinePeriodo.toFixed(2)}</td><td style="text-align:right">-</td><td style="text-align:right">-</td></tr>
+              <tr><td>Fastweb FIX</td><td style="text-align:right">${fixTotale.toFixed(2)}</td><td style="text-align:right">${risparmioFixPeriodo.toFixed(2)}</td><td style="text-align:right">${risparmioFixAnn.toFixed(2)}</td></tr>
+              <tr><td>Fastweb FLEX</td><td style="text-align:right">${flexTotale.toFixed(2)}</td><td style="text-align:right">${risparmioFlexPeriodo.toFixed(2)}</td><td style="text-align:right">${risparmioFlexAnn.toFixed(2)}</td></tr>
+              <tr><td>Flat (${piano.nome})</td><td style="text-align:right">${flatTotale.toFixed(2)}</td><td style="text-align:right">${risparmioFlatPeriodo.toFixed(2)}</td><td style="text-align:right">${risparmioFlatAnn.toFixed(2)}</td></tr>
+            </tbody>
+          </table>
+          <div style="margin-top:10px;">
+            <strong>Dettagli FIX</strong><br>
+            Componente Energia: ${fixEnergia.toFixed(2)} € · Commercializzazione: ${fixCommercializzazione.toFixed(2)} € · Rete/Oneri: ${fixRete.toFixed(2)} € · Accise: ${fixAccise.toFixed(2)} € · IVA: ${fixIva.toFixed(2)} €<br>
+            <strong>Dettagli FLEX</strong><br>
+            Componente Energia: ${flexEnergia.toFixed(2)} € · Commercializzazione: ${flexCommercializzazione.toFixed(2)} € · Rete/Oneri: ${flexRete.toFixed(2)} € · Accise: ${flexAccise.toFixed(2)} € · IVA: ${flexIva.toFixed(2)} €<br>
+            <strong>Dettagli FLAT</strong><br>
+            Piano: ${piano.nome} · Costo mensile piano: ${piano.costoMensile.toFixed(2)} € · Add. Potenza: ${addizionalePotenza.toFixed(2)} €/mese · Costo periodo: ${costoPeriodoFlat.toFixed(2)} € · Restituzione periodo: ${restituzionePeriodo.toFixed(2)} €
+          </div>
+        `;
+      }
+
+      function generaPreventivoPDF() {
+        const nome = document.getElementById('scontrino-nome').value || 'Cliente';
+        const gestore = document.getElementById('scontrino-gestore').value || 'Operatore attuale';
+        const indirizzo = document.getElementById('scontrino-indirizzo').value || 'Indirizzo non disponibile';
+        const pod = document.getElementById('scontrino-pod').value || 'POD non disponibile';
+        const consumo = parseFloat(document.getElementById('scontrino-consumo').value) || 0;
+        const spesa = parseFloat(document.getElementById('scontrino-spesa').value) || 0;
+        const potenza = parseFloat(document.getElementById('scontrino-potenza').value) || 0;
+        const periodo = parseInt(document.getElementById('scontrino-periodo').value, 10) || 1;
+        const prezzoFix = 0.16;
+        const commercializzazione = 10;
+        const prezzoFlex = 0.149;
+        const database = window.ultimoPreventivoBolletta || {};
+        const reteOneri = database.reteOneri ?? 0;
+        const quotaPerConsumi = database.quotaPerConsumi;
+        const quotaFissa = database.quotaFissa;
+        const quotaPotenza = database.quotaPotenza;
+        const acciseIva = database.acciseIva;
+        const totaleBolletta = database.totaleBolletta ?? spesa;
+
+        const fixEnergia = consumo * prezzoFix;
+        const fixCommercializzazione = commercializzazione * periodo;
+        const fixTipo = fixEnergia + fixCommercializzazione;
+        const fixAccise = fixTipo * 0.05;
+        const fixIva = (fixTipo + fixAccise) * 0.22;
+        const fixReteOneriPotenza = reteOneri || Math.max(spesa - fixTipo - fixAccise - fixIva, 0);
+        const fixTotale = fixTipo + fixReteOneriPotenza + fixAccise + fixIva;
+
+        const flexEnergia = consumo * prezzoFlex;
+        const flexCommercializzazione = commercializzazione * periodo;
+        const flexTipo = flexEnergia + flexCommercializzazione;
+        const flexAccise = flexTipo * 0.05;
+        const flexIva = (flexTipo + flexAccise) * 0.22;
+        const flexReteOneriPotenza = reteOneri || fixReteOneriPotenza;
+        const flexTotale = flexTipo + flexReteOneriPotenza + flexAccise + flexIva;
+
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+        let y = 50;
+
+        doc.setFontSize(18);
+        doc.setTextColor(34, 34, 34);
+        doc.setFont('helvetica', 'bold');
+        doc.text('FASTWEB & VODAFONE PARTNER', 40, y);
+        y += 24;
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'normal');
+        doc.text('Analisi Comparativa Ufficiale & Proposta Commerciale Business', 40, y);
+        y += 18;
+        doc.setFontSize(10);
+        doc.text('EXECUTIVE PROPOSAL FIX & FLEX', 40, y);
+
+        y += 32;
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Intestatario:', 40, y);
+        doc.setFont('helvetica', 'normal');
+        doc.text(nome, 140, y);
+        y += 16;
+        doc.setFont('helvetica', 'bold');
+        doc.text('Indirizzo Fornitura:', 40, y);
+        doc.setFont('helvetica', 'normal');
+        doc.text(indirizzo, 160, y, { maxWidth: 380 });
+        y += 16;
+        doc.setFont('helvetica', 'bold');
+        doc.text('Punto di Prelievo (POD):', 40, y);
+        doc.setFont('helvetica', 'normal');
+        doc.text(pod, 200, y);
+        y += 16;
+        doc.setFont('helvetica', 'bold');
+        doc.text('Potenza Impegnata:', 40, y);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`${potenza.toFixed(2)} kW`, 170, y);
+        y += 20;
+        doc.setFont('helvetica', 'bold');
+        doc.text('Operatore attuale:', 40, y);
+        doc.setFont('helvetica', 'normal');
+        doc.text(gestore, 160, y);
+
+        y += 28;
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.text('CONDIZIONI COMMERCIALI DEDICATE', 40, y);
+        y += 16;
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        doc.text('Opzione FIX a Prezzo Bloccato | Opzione FLEX con Spread e Commercializzazione Bloccati', 40, y, { maxWidth: 520 });
+
+        y += 24;
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.text('1. Scontrino dell\'Energia (Baseline Ufficiale Attuale)', 40, y);
+        y += 18;
+        doc.setFontSize(10);
+        doc.text('Voce di Spesa / Componente     Prezzo Medio     Importo (EUR)', 40, y);
+        y += 16;
+        doc.text(`Consumo rilevato: ${consumo.toFixed(2)} kWh`, 40, y);
+        y += 14;
+        if (quotaPerConsumi !== undefined && quotaPerConsumi !== null) {
+          doc.text(`Quota per consumi: ${quotaPerConsumi.toFixed(2)} €`, 40, y);
+          y += 14;
+        }
+        if (quotaFissa !== undefined && quotaFissa !== null) {
+          doc.text(`Quota fissa: ${quotaFissa.toFixed(2)} €`, 40, y);
+          y += 14;
+        }
+        if (quotaPotenza !== undefined && quotaPotenza !== null) {
+          doc.text(`Quota potenza: ${quotaPotenza.toFixed(2)} €`, 40, y);
+          y += 14;
+        }
+        if (reteOneri !== undefined && reteOneri !== null && reteOneri > 0) {
+          doc.text(`Rete, Oneri e Potenza: ${reteOneri.toFixed(2)} €`, 40, y);
+          y += 14;
+        }
+        if (acciseIva !== undefined && acciseIva !== null) {
+          doc.text(`Accise e IVA: ${acciseIva.toFixed(2)} €`, 40, y);
+          y += 14;
+        }
+        doc.text(`Totale Bolletta ${periodo > 1 ? `(${periodo} mesi)` : ''}: ${totaleBolletta.toFixed(2)} €`, 40, y);
+
+        y += 24;
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.text('2. Proposta Opzione A: Fastweb Luce FIX Business', 40, y);
+        y += 18;
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(10);
+        doc.text(`PREZZO FISSO E BLOCCATO A ${prezzoFix.toFixed(3)} €/kWh + ${commercializzazione.toFixed(2)} €/mese (Commercializzazione)`, 40, y, { maxWidth: 520 });
+        y += 16;
+        doc.text(`Componente Energia (${consumo.toFixed(2)} kWh @ ${prezzoFix.toFixed(3)} €/kWh): ${fixEnergia.toFixed(2)} €`, 40, y);
+        y += 14;
+        doc.text(`Commercializzazione Vendita Energia (${commercializzazione.toFixed(2)} €/mese × ${periodo} mesi): ${fixCommercializzazione.toFixed(2)} €`, 40, y);
+        y += 14;
+        doc.text(`Spesa Rete, Oneri di Sistema e Potenza (Invariati dallo scontrino): ${fixReteOneriPotenza.toFixed(2)} €`, 40, y);
+        y += 14;
+        doc.text(`Accise stimate: ${fixAccise.toFixed(2)} €`, 40, y);
+        y += 14;
+        doc.text(`IVA stimata (22%): ${fixIva.toFixed(2)} €`, 40, y);
+        y += 14;
+        doc.text(`Totale Stimato Fastweb FIX - ${periodo > 1 ? `${periodo} mesi` : 'mensile'}: ${fixTotale.toFixed(2)} €`, 40, y);
+
+        doc.addPage();
+        y = 50;
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.text('3. Proposta Opzione B: Fastweb Luce FLEX Business', 40, y);
+        y += 18;
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(10);
+        doc.text(`OPZIONE FLEX: INDICIZZATO PUN + SPREAD E COMMERCIALIZZAZIONE BLOCCATI (PUN ${prezzoFlex.toFixed(3)} € + Spread 0,030 € = ${(prezzoFlex).toFixed(3)} €/kWh + ${commercializzazione.toFixed(2)} €/mese)`, 40, y, { maxWidth: 520 });
+        y += 18;
+        doc.text(`Componente Energia (${consumo.toFixed(2)} kWh @ ${prezzoFlex.toFixed(3)} €/kWh): ${flexEnergia.toFixed(2)} €`, 40, y);
+        y += 14;
+        doc.text(`Commercializzazione Vendita Energia (${commercializzazione.toFixed(2)} €/mese × ${periodo} mesi - Bloccata): ${flexCommercializzazione.toFixed(2)} €`, 40, y);
+        y += 14;
+        doc.text(`Spesa Rete, Oneri di Sistema e Potenza (Invariati dallo scontrino): ${flexReteOneriPotenza.toFixed(2)} €`, 40, y);
+        y += 14;
+        doc.text(`Accise stimate: ${flexAccise.toFixed(2)} €`, 40, y);
+        y += 14;
+        doc.text(`IVA stimata (22%): ${flexIva.toFixed(2)} €`, 40, y);
+        y += 14;
+        doc.text(`Totale Stimato Fastweb FLEX - ${periodo > 1 ? `${periodo} mesi` : 'mensile'}: ${flexTotale.toFixed(2)} €`, 40, y);
+
+        y += 28;
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(12);
+        doc.text('4. Riepilogo e Risparmio Economico Certificato', 40, y);
+        y += 18;
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(10);
+        doc.text(`Scenario / Offerta`, 40, y);
+        y += 16;
+        doc.text(`Eni Plenitude (Scontrino Baseline) ${totaleBolletta.toFixed(2)} €`, 40, y);
+        y += 14;
+        doc.text(`Fastweb FIX Business (Prezzo Bloccato) ${fixTotale.toFixed(2)} €`, 40, y);
+        y += 14;
+        doc.text(`Fastweb FLEX Business (Spread e Commercializzazione Bloccati) ${flexTotale.toFixed(2)} €`, 40, y);
+        y += 20;
+        doc.text(`Risparmio netto FIX vs Scontrino: ${(totaleBolletta - fixTotale).toFixed(2)} €`, 40, y);
+        y += 14;
+        doc.text(`Risparmio netto FLEX vs Scontrino: ${(totaleBolletta - flexTotale).toFixed(2)} €`, 40, y);
+        y += 20;
+        doc.text('Vantaggio Economico Stimato:', 40, y);
+        y += 16;
+        doc.text(`• Fastweb FIX : Risparmio di ${(totaleBolletta - fixTotale).toFixed(2)} € sul periodo`, 40, y);
+        y += 14;
+        doc.text(`• Fastweb FLEX : Risparmio di ${(totaleBolletta - flexTotale).toFixed(2)} € sul periodo`, 40, y);
+        y += 24;
+        doc.text('Documento commerciale ufficiale emesso da Partner Autorizzato Fastweb & Vodafone Business. Calcolo basato sui dati tecnici ed economici dello scontrino ufficiale.', 40, y, { maxWidth: 520 });
+
+        doc.save('preventivo-fastweb-vodafone.pdf');
+      }
+
+      function calcolaFix() {
+        const consumo = parseFloat(document.getElementById('fix-consumo').value) || 0;
+        const periodo = parseInt(document.getElementById('fix-periodo').value, 10) || 1;
+        const prezzoKwh = parseFloat(document.getElementById('fix-prezzo-kwh').value) || 0;
+        const commercializzazioneMensile = parseFloat(document.getElementById('fix-commercializzazione').value) || 0;
+        const competitorPrezzoKwh = parseFloat(document.getElementById('fix-competitor-prezzo').value) || 0;
+        const competitorCommercializzazioneMensile = parseFloat(document.getElementById('fix-competitor-commercializzazione').value) || 0;
+
+        const nostroCostoMensile = commercializzazioneMensile + consumo * prezzoKwh;
+        const competitorCostoMensile = competitorCommercializzazioneMensile + consumo * competitorPrezzoKwh;
+        const nostroCostoPeriodo = nostroCostoMensile * periodo;
+        const competitorCostoPeriodo = competitorCostoMensile * periodo;
+        const risparmioPeriodo = competitorCostoPeriodo - nostroCostoPeriodo;
+        const risparmioMensile = risparmioPeriodo / periodo;
+
+        document.getElementById('fix-risultato').innerHTML = `
+          <strong>Valore Fix</strong>
+          Consumo mensile: ${consumo.toFixed(2)} kWh<br>
+          Periodo di confronto: ${periodo} mese/i<br>
+          Nostro costo: ${commercializzazioneMensile.toFixed(2)} € di commercializzazione + ${consumo.toFixed(2)} kWh × ${prezzoKwh.toFixed(4)} €/kWh = ${nostroCostoMensile.toFixed(2)} €/mese<br>
+          Costo operatore confrontato: ${competitorCommercializzazioneMensile.toFixed(2)} € di commercializzazione + ${consumo.toFixed(2)} kWh × ${competitorPrezzoKwh.toFixed(4)} €/kWh = ${competitorCostoMensile.toFixed(2)} €/mese<br>
+          Differenza di costo: ${competitorCostoMensile.toFixed(2)} € - ${nostroCostoMensile.toFixed(2)} € = ${risparmioMensile.toFixed(2)} €/mese<br>
+          Risparmio sul periodo: ${risparmioPeriodo.toFixed(2)} €<br>
+          Spesa nostra sul periodo: ${nostroCostoPeriodo.toFixed(2)} €<br>
+          Spesa operatore sul periodo: ${competitorCostoPeriodo.toFixed(2)} €
+        `;
+      }
+
+      function calcolaFlex() {
+        const consumo = parseFloat(document.getElementById('flex-consumo').value) || 0;
+        const periodo = parseInt(document.getElementById('flex-periodo').value, 10) || 1;
+        const commercializzazioneMensile = parseFloat(document.getElementById('flex-commercializzazione').value) || 0;
+        const pun = parseFloat(document.getElementById('flex-pun').value) || 0;
+        const spread = parseFloat(document.getElementById('flex-spread').value) || 0;
+        const competitorPrezzoKwh = parseFloat(document.getElementById('flex-competitor-prezzo').value) || 0;
+        const competitorCommercializzazioneMensile = parseFloat(document.getElementById('flex-competitor-commercializzazione').value) || 0;
+
+        const nostroCostoMensile = commercializzazioneMensile + consumo * (pun + 0.026);
+        const competitorCostoMensile = competitorCommercializzazioneMensile + consumo * competitorPrezzoKwh;
+        const nostroCostoPeriodo = nostroCostoMensile * periodo;
+        const competitorCostoPeriodo = competitorCostoMensile * periodo;
+        const risparmioPeriodo = competitorCostoPeriodo - nostroCostoPeriodo;
+        const risparmioMensile = risparmioPeriodo / periodo;
+
+        document.getElementById('flex-risultato').innerHTML = `
+          <strong>Valore Flex</strong>
+          Consumo mensile: ${consumo.toFixed(2)} kWh<br>
+          Periodo di confronto: ${periodo} mese/i<br>
+          Nostro costo: ${commercializzazioneMensile.toFixed(2)} € di commercializzazione + ${consumo.toFixed(2)} kWh × ${(pun + 0.026).toFixed(4)} €/kWh = ${nostroCostoMensile.toFixed(2)} €/mese<br>
+          Costo operatore confrontato: ${competitorCommercializzazioneMensile.toFixed(2)} € di commercializzazione + ${consumo.toFixed(2)} kWh × ${competitorPrezzoKwh.toFixed(4)} €/kWh = ${competitorCostoMensile.toFixed(2)} €/mese<br>
+          Differenza di costo: ${competitorCostoMensile.toFixed(2)} € - ${nostroCostoMensile.toFixed(2)} € = ${risparmioMensile.toFixed(2)} €/mese<br>
+          Risparmio sul periodo: ${risparmioPeriodo.toFixed(2)} €<br>
+          Spesa nostra sul periodo: ${nostroCostoPeriodo.toFixed(2)} €<br>
+          Spesa operatore sul periodo: ${competitorCostoPeriodo.toFixed(2)} €
+        `;
+      }
+
+      function confrontaOfferte() {
+        const consumoFlat = parseFloat(document.getElementById('flat-consumo').value) || 0;
+        const spesaFlat = parseFloat(document.getElementById('flat-spesa').value) || 0;
+        const potenzaFlat = parseFloat(document.getElementById('flat-potenza').value) || 0;
+        const piani = [
+          { nome: 'START', max: 800, costoMensile: 36, restituzione: 0.30 },
+          { nome: 'LIGHT', max: 1500, costoMensile: 53, restituzione: 0.27 },
+          { nome: 'PRO', max: 2500, costoMensile: 76, restituzione: 0.21 },
+          { nome: 'MAXI', max: 3500, costoMensile: 98, restituzione: 0.20 },
+          { nome: 'ULTRA', max: 4500, costoMensile: 119, restituzione: 0.13 }
+        ];
+
+        let pianoFlat = piani[piani.length - 1];
+        for (const item of piani) {
+          if (consumoFlat <= item.max) {
+            pianoFlat = item;
+            break;
+          }
+        }
+
+        const costoAggiuntivoFlat = calcolaCostoAggiuntivoPotenza(potenzaFlat);
+        const costoMensileFlat = pianoFlat.costoMensile + costoAggiuntivoFlat;
+        const kwhNonConsumatiFlat = Math.max(pianoFlat.max - consumoFlat, 0);
+        const restituzioneBaseFlat = kwhNonConsumatiFlat * pianoFlat.restituzione;
+        const spesaNettaFlat = spesaFlat > 0 ? Math.max(spesaFlat - restituzioneBaseFlat, 0) : 0;
+        const bonusFlat = consumoFlat < pianoFlat.max * 0.7 ? consumoFlat * 0.02 : 0;
+
+        const consumoFix = parseFloat(document.getElementById('fix-consumo').value) || 0;
+        const periodoFix = parseInt(document.getElementById('fix-periodo').value, 10) || 1;
+        const prezzoKwhFix = parseFloat(document.getElementById('fix-prezzo-kwh').value) || 0;
+        const commercializzazioneFix = parseFloat(document.getElementById('fix-commercializzazione').value) || 0;
+        const costoMensileFix = commercializzazioneFix + consumoFix * prezzoKwhFix;
+        const costoPeriodoFix = costoMensileFix * periodoFix;
+
+        const consumoFlex = parseFloat(document.getElementById('flex-consumo').value) || 0;
+        const periodoFlex = parseInt(document.getElementById('flex-periodo').value, 10) || 1;
+        const commercializzazioneFlex = parseFloat(document.getElementById('flex-commercializzazione').value) || 0;
+        const punFlex = parseFloat(document.getElementById('flex-pun').value) || 0;
+        const spreadFlex = parseFloat(document.getElementById('flex-spread').value) || 0;
+        const costoMensileFlex = commercializzazioneFlex + consumoFlex * (punFlex + spreadFlex);
+        const costoPeriodoFlex = costoMensileFlex * periodoFlex;
+
+        const offerte = [
+          {
+            nome: 'Flat',
+            costoMensile: costoMensileFlat,
+            costoPeriodo: costoMensileFlat * 1,
+            dettaglio: `Piano ${pianoFlat.nome} · Bonus Smart ${bonusFlat.toFixed(2)} €`
+          },
+          {
+            nome: 'Fix',
+            costoMensile: costoMensileFix,
+            costoPeriodo: costoPeriodoFix,
+            dettaglio: `${periodoFix} mese/i · ${prezzoKwhFix.toFixed(4)} €/kWh`
+          },
+          {
+            nome: 'Flex',
+            costoMensile: costoMensileFlex,
+            costoPeriodo: costoPeriodoFlex,
+            dettaglio: `${periodoFlex} mese/i · ${((punFlex + spreadFlex)).toFixed(4)} €/kWh`
+          }
+        ];
+
+        const migliore = offerte.slice().sort((a, b) => a.costoMensile - b.costoMensile)[0];
+
+        document.getElementById('confronto-risultato').innerHTML = `
+          <strong>Confronto offerte</strong>
+          <table class="comparison-table">
+            <thead>
+              <tr>
+                <th>Offerta</th>
+                <th>Costo mensile</th>
+                <th>Periodo</th>
+                <th>Dettaglio</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${offerte.map((offerta) => `
+                <tr>
+                  <td>${offerta.nome}</td>
+                  <td>${offerta.costoMensile.toFixed(2)} €</td>
+                  <td>${offerta.nome === 'Flat' ? '1 mese' : `${periodoFix === 2 || offerta.nome === 'Flex' ? periodoFlex : periodoFix} mese/i`}</td>
+                  <td>${offerta.dettaglio}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+          <br>
+          Offerta più conveniente: <strong>${migliore.nome}</strong> con circa ${migliore.costoMensile.toFixed(2)} €/mese.
+        `;
+      }
+
+      setUtility('luce');
+      setOffer('flat');
+    </script>
+  </body>
+</html>
